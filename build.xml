@@ -1,0 +1,47 @@
+<project name="SimpleAPI" default="jar" basedir=".">
+	<property name="dir.src" value="src"/>
+	<property name="dir.build" value="build"/>
+	<property name="dir.dest" value="dest"/>
+	
+	<target name="clean" description="Removing the all generated files.">
+		<delete dir="${dir.build}"/>
+		<delete dir="${dir.dest}"/>
+	</target>
+	
+	<target name="prepare" depends="clean">
+		<mkdir dir="${dir.build}"/>
+		<mkdir dir="${dir.dest}"/>
+		<mkdir dir="${dir.src}"/>
+	</target>
+	
+	<target name="compile" depends="prepare" description="Compilation of all source code.">
+		<javac srcdir="${dir.src}" destdir="${dir.build}"/>
+	</target>
+	
+	<target name="jar" depends="compile" description="Generates Roseindia.jar file in to the 'dest' directory.">
+		<jar jarfile="${dir.dest}/simpleapi.jar" basedir="${dir.build}"/>
+	</target>
+	
+	<target name="echo">
+		<echo message="The operating system is: ${os.name}"/>
+
+		<!-- absolute path of the project. -->
+		<echo message="The home path is: ${basedir}"/>
+
+		<!-- absolute path of the build file. -->
+		<echo message="The file name is: ${ant.file}"/>
+
+		<!-- root directory of ant. -->
+		<echo message="The Project name is: ${ant.project.name}"/>
+		<echo message="The Ant home directory is: ${ant.home}"/>
+		<echo message="The Ant version is: ${ant.version}"/> 
+		<echo message="The Java version is: ${ant.java.version}"/>
+		
+		<!-- System properties. -->
+		<echo message="The Java home directory is: ${java.home}"/>
+		<echo message="The User home directory is: ${user.home}"/>
+		<echo message="The User name is: ${user.name}"/>
+	</target>
+
+</project>
+
