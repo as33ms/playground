@@ -61,9 +61,6 @@
 			<formatter type="xml"/>
 
 			<test name="tests.TestSimpleAPI"/>
-			<!--batchtest fork="yes">
-				<fileset dir="${dir.test}" includes="Test*.java"/>
-			</batchtest-->
 		</junit>
 	</target>
 	
