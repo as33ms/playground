@@ -1,34 +1,80 @@
 <project name="SimpleAPI" default="jar" basedir=".">
-	<property name="dir.src" value="src"/>
-	<property name="dir.build" value="build"/>
-	<property name="dir.dest" value="dest"/>
+	<property name="dir.src" value="src/api"/>
+	<property name="dir.test" value="src/tests"/>
+	<property name="dir.libs" value="libs" />
+	<property name="dir.build" value="output"/>
+	<property name="class.main" value="api.SimpleAPI" />
 	
+	<path id="application" location="${dir.build}/jar/${ant.project.name}.jar" />
+	
+	<path id="classpath.base"/>
+	
+	<path id="classpath.test">
+		<pathelement location="libs/junit-4.11.jar"/>
+		<pathelement location="libs/hamcrest-core-1.3.jar"/>
+		<pathelement location="${dir.src}"/>
+		<pathelement location="${dir.test}"/>
+		<path refid="classpath.base"/>
+	</path>
+
 	<target name="clean" description="Removing the all generated files.">
 		<delete dir="${dir.build}"/>
-		<delete dir="${dir.dest}"/>
 	</target>
 	
 	<target name="prepare" depends="clean">
-		<mkdir dir="${dir.build}"/>
-		<mkdir dir="${dir.dest}"/>
-		<mkdir dir="${dir.src}"/>
+		<mkdir dir="${dir.build}/jar"/>
+		<mkdir dir="${dir.build}/classes"/>
 	</target>
 	
-	<target name="compile" depends="prepare" description="Compilation of all source code.">
-		<javac srcdir="${dir.src}" destdir="${dir.build}"/>
+	
+	<target name="compile-src" depends="prepare" description="Compilation of all source code.">
+		<javac srcdir="${dir.src}" destdir="${dir.build}/classes" includeantruntime="true"/>
+	</target>
+
+	<target name="compile-test" depends="compile-src" description="Compilation of all tests in the code.">
+		<javac srcdir="${dir.test}" destdir="${dir.build}/classes" includeantruntime="true">
+			<classpath refid="classpath.test"/>
+		</javac>
 	</target>
 	
-	<target name="jar" depends="compile" description="Generates Roseindia.jar file in to the 'dest' directory.">
-		<jar jarfile="${dir.dest}/simpleapi.jar" basedir="${dir.build}"/>
+	<target name="jar" depends="compile-src" description="Generates ${ant.project.name}.jar file in to the '${dir.out}' directory.">
+		<jar destfile="${dir.build}/jar/${ant.project.name}.jar" basedir="${dir.build}/classes">
+			<manifest>
+				<attribute name="Main-Class" value="${class.main}" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="run" depends="jar" description="Runs the sample of the API">
+		<java classname="${class.main}" fork="true">
+			<classpath>
+				<path refid="application"/>
+			</classpath>
+		</java>
+	</target>
+	
+
+	
+	<target name="junit" depends="compile-test,jar">
+		<junit printsummary="on">
+			<classpath refid="classpath.test"/>
+			
+			<formatter type="xml"/>
+			<test name="TestSimpleAPI"/>
+			<!--batchtest fork="yes">
+				<fileset dir="${dir.test}" includes="Test*.java"/>
+			</batchtest-->
+		</junit>
 	</target>
 	
 	<target name="echo">
 		<echo message="The operating system is: ${os.name}"/>
-
+		
+		<echo message="The classpath is: ${java.class.path}"/>
 		<!-- absolute path of the project. -->
 		<echo message="The home path is: ${basedir}"/>
 
-		<!-- absolute path of the build file. -->
+		<!-- absolute path of the out file. -->
 		<echo message="The file name is: ${ant.file}"/>
 
 		<!-- root directory of ant. -->
