@@ -55,10 +55,11 @@
 	</target>
 	
 	<target name="junit" depends="compile-test,jar">
-		<junit printsummary="on" fork="yes" haltonfailure="yes">
+		<junit printsummary="on" fork="yes">
 			<classpath refid="classpath.test"/>
 			
-			<formatter type="xml"/>
+			<formatter type="xml" usefile="true"/>
+			<formatter type="plain" usefile="false"/>
 
 			<test name="tests.TestSimpleAPI"/>
 		</junit>
