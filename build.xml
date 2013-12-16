@@ -14,6 +14,7 @@
 		<pathelement location="libs/hamcrest-core-1.3.jar"/>
 		<pathelement location="${dir.src}"/>
 		<pathelement location="${dir.test}"/>
+		<pathelement location="${dir.build}/classes"/>
 		<path refid="classpath.base"/>
 	</path>
 
@@ -36,7 +37,7 @@
 			<classpath refid="classpath.test"/>
 		</javac>
 	</target>
-	
+
 	<target name="jar" depends="compile-src" description="Generates ${ant.project.name}.jar file in to the '${dir.out}' directory.">
 		<jar destfile="${dir.build}/jar/${ant.project.name}.jar" basedir="${dir.build}/classes">
 			<manifest>
@@ -53,14 +54,13 @@
 		</java>
 	</target>
 	
-
-	
 	<target name="junit" depends="compile-test,jar">
-		<junit printsummary="on">
+		<junit printsummary="on" fork="yes" haltonfailure="yes">
 			<classpath refid="classpath.test"/>
 			
 			<formatter type="xml"/>
-			<test name="TestSimpleAPI"/>
+
+			<test name="tests.TestSimpleAPI"/>
 			<!--batchtest fork="yes">
 				<fileset dir="${dir.test}" includes="Test*.java"/>
 			</batchtest-->
@@ -80,7 +80,7 @@
 		<!-- root directory of ant. -->
 		<echo message="The Project name is: ${ant.project.name}"/>
 		<echo message="The Ant home directory is: ${ant.home}"/>
-		<echo message="The Ant version is: ${ant.version}"/> 
+		<echo message="The Ant version is: ${ant.version}"/>
 		<echo message="The Java version is: ${ant.java.version}"/>
 		
 		<!-- System properties. -->
