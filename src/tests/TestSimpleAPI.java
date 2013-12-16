@@ -41,4 +41,12 @@ public class TestSimpleAPI extends TestCase {
 		int a = SimpleAPI.multiply(2, 3);
 		assertTrue("Multiply API not working. Expected 6 but received: " + a, a == 6);
 	}
+
+	public void testFailure1() {
+		assertTrue("A dummy test failure: 1", false);
+	}
+
+	public void testFailure2() {
+		assertTrue("A dummy test failure: 2", false);
+	}
 }
