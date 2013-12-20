@@ -7,7 +7,7 @@ Contents:
   + simpleAPI: Sample Java project
   + python-utils: Some general python utilities
 
-Coming soon:
+Coming soon (possibly):
   - shell-utils
   - android-utils
   - ruby-utils
