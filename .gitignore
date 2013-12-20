@@ -4,3 +4,6 @@
 *.jar
 *.war
 *.ear
+
+# Generated TEST*xml files #
+TEST*.xml
