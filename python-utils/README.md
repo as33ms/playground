@@ -10,4 +10,7 @@ python-utils
      Data for Skipped and other types of outcome has not yet been handled
      since I have not come across any test with outcome other than Failed
      or Passed in *.trx files
-
+ + create_junit.py:
+     A useless (or useful) utility for creating nice graphs in parent
+     Jenkins's job which triggers other child jobs in Matrix configuration.
+     This particular usecase is for TestLink - Jenkins integration
