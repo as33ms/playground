@@ -33,7 +33,6 @@ for creating test statistics and reporting status to TestLink.
 
 import os
 import sys
-from lxml.html import unicode
 
 TESTCASE_NAME = 0
 TESTCASE_STATUS = 1
