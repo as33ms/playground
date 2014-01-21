@@ -34,8 +34,10 @@ for creating test statistics and reporting status to TestLink.
 import os
 import sys
 
-TESTCASE_NAME = 0
-TESTCASE_STATUS = 1
+TL_TESTPLAN_NAME = 0 #$TESTLINK_TESTPLAN_NAME
+TL_TESTCASE_NAME = 1 #$TESTLINK_TESTCASE_NAME
+JENKINS_JOB_NAME = 2 #$JENKINSID (or the custom field)
+TESTCASE_RUN_STATUS = 3 #pass/fail
 
 def show_info(info):
     print (" [INFO]: %s" % info)
@@ -50,7 +52,7 @@ def show_error(error, exit=True):
 def usage():
     script = os.path.basename(__file__)
     print
-    print ("$ %s test_case_name <pass / fail / Pass / Fail>" % script)
+    print ("$ %s testlink_case testlink_plan jenkins_job <pass/fail>" % script)
     print
 
 #Import the superstar
@@ -71,19 +73,40 @@ def parse_file(infile):
         sys.exit(1)
     return data
 
+def create_testsuite (name, total, fails, errors=0, skips=0, times='0.5'):
+    suite = etree.Element("testsuite", name=u'%s' % str(name),
+                                       tests=u'%s' % str(total),
+                                       failures=u'%s' % str(fails),
+                                       skipped=u'%s' % str(skips),
+                                       errors=u'%s' % str(errors),
+                                       time=u'%s' % str(times))
+    return suite
+
+def add_new_testcase (rootelement, attribs):
+    case = etree.SubElement(rootelement, "testcase", attrib=attribs)
+    
+    if attribs['result'] in ['Fail', 'fail']:
+        failure = etree.SubElement(case, "failure",
+                type=u'jenkins.jobExecution.Failure', message=u'null')
+        failure.text = "Check '%s' for failure details" % attribs['classname'] 
+    return case
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     
-    if len(args) != 2:
+    if len(args) != 4:
         show_error("Invalid script usage!", False)
         usage()
         sys.exit(1)
 
     doc = 'junit-report-full.xml'
-    tc_name = args[TESTCASE_NAME]
-    tc_status = args[TESTCASE_STATUS]
+    tl_plan = args[TL_TESTPLAN_NAME]
+    tl_case = args[TL_TESTCASE_NAME]
+    jenkins_job = args[JENKINS_JOB_NAME]
+    job_run_status = args[TESTCASE_RUN_STATUS]
     
-    if tc_status not in ["Pass", "Fail", "pass", "fail"]:
+    if job_run_status not in ["Pass", "Fail", "pass", "fail"]:
         show_error("Not a valid status for testcase", True)
 
     if (os.path.exists(os.path.basename(doc))):
@@ -93,59 +116,35 @@ if __name__ == "__main__":
         
         total = u'%s' % str(len(existing_tests) + 1)
 
-        fails = 1 if tc_status in ['Fail', 'fail'] else 0
+        fails = 1 if job_run_status in ['Fail', 'fail'] else 0
 
         for test in existing_tests:
             if test.attrib['result'] in ['Fail', 'fail']:
                 fails = fails + 1
 
-        testsuite = etree.Element("testsuite", tests=total,
-                failures=u'%s' % str(fails), errors=u'0', skipped=u'0',
-                name=u'TestLink TestSuite', time=u'0.5')
-
+        testsuite = create_testsuite(tl_plan, total, fails)
         junitdoc = etree.ElementTree(testsuite)
         
         for test in existing_tests:
-            t = etree.SubElement(testsuite, "testcase", time=u'0',
-                    attrib=test.attrib)
-            
-            if test.attrib['result'] in ['Fail', 'fail']:
-                failure = etree.SubElement(t, "failure",
-                        type=u'jenkins.jobExecution.Failure', message=u'null')
-                failure.text = "Please check JOB %s for failure details" % (
-                        str(test.attrib['name']))
+            add_new_testcase(testsuite, test.attrib)
 
-        new_test = etree.SubElement(testsuite, "testcase",
-                                    name=tc_name,
-                                    result=tc_status)
-
-        if tc_status in ['Fail', 'fail']:
-            failure = etree.SubElement(testsuite, "failure",
-                    type=u'jenkins.jobExecution.Failure', message=u'null')
-            failure.text = "Please check JOB %s for failure details" % tc_name
+        add_new_testcase(testsuite, {'time': u'0', 'name': u'%s' % str(tl_case),
+                                    'result': u'%s' % str(job_run_status),
+                                    'classname': u'%s' % str(jenkins_job)})
 
         show_info("Summary [total: %s, failures:%s]" % (total, fails));
     else:
-        if tc_status in ['Fail', 'fail']:
-            failed = u'1'
-        elif tc_status in ['Pass', 'pass']:
-            failed = u'0'
+        failed = 1 if job_run_status in ['Fail', 'fail'] else 0
 
-        testsuite = etree.Element("testsuite", tests=u'1', errors=u'0',
-                time=u'0.5', skipped=u'0', name=u'TestLink TestSuite',
-                failures=failed);
+        testsuite = create_testsuite(tl_plan, 1, failed)
+        junitdoc = etree.ElementTree(testsuite)
+        
+        add_new_testcase(testsuite, {'time': u'0', 'name': u'%s' % str(tl_case),
+                                    'result': u'%s' % str(job_run_status),
+                                    'classname': u'%s' % str(jenkins_job)})
 
-        junitdoc = etree.ElementTree(testsuite);
-        
-        testcase = etree.SubElement(testsuite, "testcase",
-                                    name=tc_name, time=u'0',
-                                    classname=tc_name, result=tc_status)
-        
-        if tc_status in ['Fail', 'fail']:
-            failure = etree.SubElement(testcase, "failure",
-                    type=u'jenkins.jobExecution.Failure', message=u'null')
-            failure.text = "Please check JOB %s for failure details" % tc_name
-            
+        show_info("Summary [total: 1, failures:%s]" % str(failed));
+
     outfile = open(doc, "wb")
     junitdoc.write(outfile, xml_declaration=True, encoding='utf-8')
-    show_info("Added '%s' to %s (result: %s)" % (tc_name, doc, tc_status))
+    show_info("Added '%s' to %s (result: %s)" % (tl_case, doc, job_run_status))
