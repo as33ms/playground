@@ -130,7 +130,8 @@ if __name__ == "__main__":
 
         add_new_testcase(testsuite, {'time': u'0', 'name': u'%s' % str(tl_case),
                                     'result': u'%s' % str(job_run_status),
-                                    'classname': u'%s' % str(jenkins_job)})
+                                    'classname': u'%s' % str(jenkins_job),
+                                    'JenkinsID': u'%s' % str(jenkins_job)})
 
         show_info("Summary [total: %s, failures:%s]" % (total, fails));
     else:
