@@ -92,31 +92,59 @@ if __name__ == "__main__":
         existing_tests = existing_data.xpath("/testsuite/testcase")
         
         total = u'%s' % str(len(existing_tests) + 1)
-        
-        testsuite = etree.Element("testsuite", tests=total)
+
+        fails = 1 if tc_status in ['Fail', 'fail'] else 0
+
+        for test in existing_tests:
+            if test.attrib['result'] in ['Fail', 'fail']:
+                fails = fails + 1
+
+        testsuite = etree.Element("testsuite", tests=total,
+                failures=u'%s' % str(fails), errors=u'0', skipped=u'0',
+                name=u'TestLink TestSuite', time=u'0.5')
+
         junitdoc = etree.ElementTree(testsuite)
         
         for test in existing_tests:
-            t = etree.SubElement(testsuite, "testcase",
-                                 name=test.attrib['name'],
-                                 result=test.attrib['result'])
-            t.text = test.text
+            t = etree.SubElement(testsuite, "testcase", time=u'0',
+                    attrib=test.attrib)
             
+            if test.attrib['result'] in ['Fail', 'fail']:
+                failure = etree.SubElement(t, "failure",
+                        type=u'jenkins.jobExecution.Failure', message=u'null')
+                failure.text = "Please check JOB %s for failure details" % (
+                        str(test.attrib['name']))
+
         new_test = etree.SubElement(testsuite, "testcase",
                                     name=tc_name,
                                     result=tc_status)
+
         if tc_status in ['Fail', 'fail']:
-            new_test.text = "Job execution failed. Please check Jenkins"
+            failure = etree.SubElement(testsuite, "failure",
+                    type=u'jenkins.jobExecution.Failure', message=u'null')
+            failure.text = "Please check JOB %s for failure details" % tc_name
+
+        show_info("Summary [total: %s, failures:%s]" % (total, fails));
     else:
-        testsuite = etree.Element("testsuite", tests=u'1');
+        if tc_status in ['Fail', 'fail']:
+            failed = u'1'
+        elif tc_status in ['Pass', 'pass']:
+            failed = u'0'
+
+        testsuite = etree.Element("testsuite", tests=u'1', errors=u'0',
+                time=u'0.5', skipped=u'0', name=u'TestLink TestSuite',
+                failures=failed);
+
         junitdoc = etree.ElementTree(testsuite);
         
         testcase = etree.SubElement(testsuite, "testcase",
-                                    name=tc_name,
-                                    result=tc_status)
+                                    name=tc_name, time=u'0',
+                                    classname=tc_name, result=tc_status)
         
         if tc_status in ['Fail', 'fail']:
-            testcase.text = "Job execution failed. Please check Jenkins"
+            failure = etree.SubElement(testcase, "failure",
+                    type=u'jenkins.jobExecution.Failure', message=u'null')
+            failure.text = "Please check JOB %s for failure details" % tc_name
             
     outfile = open(doc, "wb")
     junitdoc.write(outfile, xml_declaration=True, encoding='utf-8')
