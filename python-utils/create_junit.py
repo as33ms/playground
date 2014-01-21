@@ -36,8 +36,9 @@ import sys
 
 TL_TESTPLAN_NAME = 0 #$TESTLINK_TESTPLAN_NAME
 TL_TESTCASE_NAME = 1 #$TESTLINK_TESTCASE_NAME
-JENKINS_JOB_NAME = 2 #$JENKINSID (or the custom field)
-TESTCASE_RUN_STATUS = 3 #pass/fail
+TL_TESTCASE_ID = 2 #$TESTLINK_TESTCASE_ID
+JENKINS_JOB_NAME = 3 #$JENKINSID (or the custom field)
+TESTCASE_RUN_STATUS = 4 #pass/fail
 
 def show_info(info):
     print (" [INFO]: %s" % info)
@@ -103,6 +104,7 @@ if __name__ == "__main__":
     doc = 'junit-report-full.xml'
     tl_plan = args[TL_TESTPLAN_NAME]
     tl_case = args[TL_TESTCASE_NAME]
+    tl_case_id = args[TL_TESTCASE_ID]
     jenkins_job = args[JENKINS_JOB_NAME]
     job_run_status = args[TESTCASE_RUN_STATUS]
     
@@ -130,6 +132,7 @@ if __name__ == "__main__":
 
         add_new_testcase(testsuite, {'time': u'0', 'name': u'%s' % str(tl_case),
                                     'result': u'%s' % str(job_run_status),
+                                    'id': u'%s' % str(tl_case_id),
                                     'classname': u'%s' % str(jenkins_job),
                                     'JenkinsID': u'%s' % str(jenkins_job)})
 
@@ -142,6 +145,7 @@ if __name__ == "__main__":
         
         add_new_testcase(testsuite, {'time': u'0', 'name': u'%s' % str(tl_case),
                                     'result': u'%s' % str(job_run_status),
+                                    'id': u'%s' % str(tl_case_id),
                                     'classname': u'%s' % str(jenkins_job),
                                     'JenkinsID': u'%s' % str(jenkins_job)})
 
