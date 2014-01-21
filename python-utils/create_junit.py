@@ -53,7 +53,8 @@ def show_error(error, exit=True):
 def usage():
     script = os.path.basename(__file__)
     print
-    print ("$ %s testlink_case testlink_plan jenkins_job <pass/fail>" % script)
+    print ("$ %s plan_name case_name case_id jenkins_job <pass/fail>" % script)
+    print ("    where, all arguments are available via envronment variables")
     print
 
 #Import the superstar
@@ -96,7 +97,7 @@ def add_new_testcase (rootelement, attribs):
 if __name__ == "__main__":
     args = sys.argv[1:]
     
-    if len(args) != 4:
+    if len(args) != 5:
         show_error("Invalid script usage!", False)
         usage()
         sys.exit(1)
