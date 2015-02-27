@@ -2,6 +2,7 @@
 
 import os
 import sys
+import glob
 
 def show_info(info):
     print (" [INFO]: %s" % info)
@@ -25,8 +26,6 @@ except ImportError:
     show_error("Unable to find module etree in lxml! Do you have python-lxml installed?")
     sys.exit(1)
 
-
-    
 def parse_trx(infile):
     """
     parse the trx (which is in xml format) file and return the data
@@ -49,7 +48,17 @@ if __name__ == "__main__":
     testsuites = etree.Element("testsuites")
     junitdoc = etree.ElementTree(testsuites)
     
-    for trxfile in args:
+    trxfiles = []
+    for arg in args:
+        files = glob.glob(arg)
+        
+        if not files:
+            trxfiles.append(arg)
+        else:
+            trxfiles = trxfiles + files
+
+        
+    for trxfile in trxfiles:
         print
         if os.path.exists(trxfile):
             show_info("Analyzing trxfile '%s'" % trxfile)
