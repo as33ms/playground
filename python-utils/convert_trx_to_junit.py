@@ -42,7 +42,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
 
     if not args:
-        show_error("Invalid script usage!", false)
+        show_error("Invalid script usage!", False)
         usage()
         sys.exit(1)
 
